@@ -63,6 +63,22 @@ function App() {
     setHighlightedSquares([])
     setGameState(AWAITING_RESET)
   }
+  const moveChecker = (locationIndex)=>{
+    console.log(`move ${locationIndex}`)
+    const selectedCheckerIndex = checkerCurrentLocations.indexOf(selectedChecker)
+    
+    checkerCurrentLocations[selectedCheckerIndex] = locationIndex
+    
+    
+    const deleteLocationIndex = (locationIndex + selectedChecker) / 2
+    const deleteArrayIndex = checkerCurrentLocations.indexOf(deleteLocationIndex)
+    checkerCurrentLocations.splice(deleteArrayIndex,1)
+    console.log(checkerCurrentLocations)
+    setCheckerCurrentLocations([...checkerCurrentLocations])
+    setSelectedChecker(0)
+    setHighlightedSquares([])
+    setGameState(AWAITING_RESET)
+  }
 
   if (gameState == PIECE_ASSIGNMENT) {
 
@@ -107,7 +123,7 @@ function App() {
 
 
 
-          {checkerStartLocations.map((locationIndex, arrayIndex) => {// checkers in starting locations
+          {checkerCurrentLocations.map((locationIndex, arrayIndex) => {// checkers in starting locations
             if (locationIndex == selectedChecker) {
               return (<Checker key={locationIndex} locationIndex={locationIndex} onClick={() => { deselectChecker(arrayIndex) }} selected={true}></Checker>)
             } else {
@@ -128,7 +144,7 @@ function App() {
           {one_onehundred.map((locationIndex, arrayIndex) => // squares for the board
             <Square key={locationIndex} locationIndex={locationIndex} ></Square>
           )}
-          {checkerStartLocations.map((locationIndex, arrayIndex) => // checkers in starting locations
+          {checkerCurrentLocations.map((locationIndex, arrayIndex) => // checkers in starting locations
             <Checker key={locationIndex} locationIndex={locationIndex} onClick={() => { selectChecker(arrayIndex) }}></Checker>
           )}
         </Board>
