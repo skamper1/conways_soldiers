@@ -12,6 +12,7 @@ function App() {
   const [gameState, setGameState] = useState(PIECE_ASSIGNMENT)
   const [selectedChecker, setSelectedChecker] = useState(0)
   const [checkerStartLocations, setCheckerStartLocations] = useState([55, 65])
+  const [checkerOriginalLocations, setCheckerOriginalLocations] = useState([55,65]) // used for keys on moving to animate
   const [checkerCurrentLocations, setCheckerCurrentLocations] = useState([55, 65])
   const [highlightedSquares, setHighlightedSquares] = useState([])
   const [saveURL, setSaveURL] = useState(url.href)
@@ -75,6 +76,9 @@ function App() {
     checkerCurrentLocations.splice(deleteArrayIndex,1)
     console.log(checkerCurrentLocations)
     setCheckerCurrentLocations([...checkerCurrentLocations])
+    checkerOriginalLocations.splice(deleteArrayIndex,1)
+    setCheckerOriginalLocations([...checkerOriginalLocations])
+    console.log(checkerOriginalLocations)
     setSelectedChecker(0)
     setHighlightedSquares([])
     setGameState(AWAITING_RESET)
@@ -85,7 +89,7 @@ function App() {
     return (
       <>
         <h1>Piece Assignment State</h1>
-        <Board buttonText='Play' buttonOnClick={() => { setGameState(AWAITING_RESET); setCheckerCurrentLocations([...checkerStartLocations]) }} saveURL={saveURL}>
+        <Board buttonText='Play' buttonOnClick={() => { setGameState(AWAITING_RESET); setCheckerCurrentLocations([...checkerStartLocations]); setCheckerOriginalLocations([...checkerStartLocations]) }} saveURL={saveURL}>
           {one_onehundred.map((locationIndex, arrayIndex) => {// squares for the board
             if (locationIndex > 50 && !checkerStartLocations.includes(locationIndex)) {
               //square without a checker on event to add checker
@@ -97,7 +101,7 @@ function App() {
           }
           )}
           {checkerStartLocations.map((locationIndex, arrayIndex) => // checkers in starting locations
-            <Checker key={locationIndex} locationIndex={locationIndex} onClick={() => { removeChecker(arrayIndex) }}></Checker>
+            <Checker key={checkerOriginalLocations[arrayIndex]} locationIndex={locationIndex} onClick={() => { removeChecker(arrayIndex) }}></Checker>
           )}
         </Board>
 
@@ -125,9 +129,9 @@ function App() {
 
           {checkerCurrentLocations.map((locationIndex, arrayIndex) => {// checkers in starting locations
             if (locationIndex == selectedChecker) {
-              return (<Checker key={locationIndex} locationIndex={locationIndex} onClick={() => { deselectChecker(arrayIndex) }} selected={true}></Checker>)
+              return (<Checker key={checkerOriginalLocations[arrayIndex]} locationIndex={locationIndex} onClick={() => { deselectChecker(arrayIndex) }} selected={true}></Checker>)
             } else {
-              return (<Checker key={locationIndex} locationIndex={locationIndex} onClick={() => { selectChecker(arrayIndex) }} ></Checker>)
+              return (<Checker key={checkerOriginalLocations[arrayIndex]} locationIndex={locationIndex} onClick={() => { selectChecker(arrayIndex) }} ></Checker>)
             }
           }
           )}
@@ -198,15 +202,15 @@ function Square({ locationIndex, onClick, highlighted }) {
 
   const ij = ijfromlocationindex(locationIndex)
   const o = objectprops(ij.i, ij.j)
-
+  const squareStyle = {WebkitTransition: '0.3s ease-in-out',MozTransition: '0.3s ease-in-out',OTransition: '0.3s ease-in-out',Transition: '0.3s ease-in-out'};
   if (highlighted) {
     //#6a2150
     return (
-      <rect x={o.x} y={o.y} fill={o.rectfill} width={o.width} height={o.width} onClick={onClick} stroke="orange"></rect>
+      <rect x={o.x} y={o.y} fill={o.rectfill} width={o.width} height={o.width} onClick={onClick} stroke="orange" style={squareStyle}></rect>
     )
   }
   return (
-    <rect x={o.x} y={o.y} fill={o.rectfill} width={o.width} height={o.width} onClick={onClick}></rect>
+    <rect x={o.x} y={o.y} fill={o.rectfill} width={o.width} height={o.width} onClick={onClick} style={squareStyle}></rect>
   )
 
 }

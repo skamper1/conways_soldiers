@@ -61,7 +61,9 @@ html {
 
 .board {
     position: relative;
-    width: 800px;
+    min-width: 400px;
+    width: 100%;
+    max-width: 800px;
     height: 800px;
     margin: 0 auto;
 }
