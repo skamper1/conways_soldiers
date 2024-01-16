@@ -12,7 +12,7 @@ function App() {
   const [gameState, setGameState] = useState(PIECE_ASSIGNMENT)
   const [selectedChecker, setSelectedChecker] = useState(0)
   const [checkerStartLocations, setCheckerStartLocations] = useState([55, 65])
-  const [checkerOriginalLocations, setCheckerOriginalLocations] = useState([55,65]) // used for keys on moving to animate
+  const [checkerOriginalLocations, setCheckerOriginalLocations] = useState([55, 65]) // used for keys on moving to animate
   const [checkerCurrentLocations, setCheckerCurrentLocations] = useState([55, 65])
   const [highlightedSquares, setHighlightedSquares] = useState([])
   const [saveURL, setSaveURL] = useState(url.href)
@@ -26,6 +26,7 @@ function App() {
   const removeChecker = (arrayIndex) => {
     checkerStartLocations.splice(arrayIndex, 1)
     setCheckerStartLocations([...checkerStartLocations])
+    setCheckerOriginalLocations([...checkerStartLocations])
   }
 
 
@@ -64,19 +65,19 @@ function App() {
     setHighlightedSquares([])
     setGameState(AWAITING_RESET)
   }
-  const moveChecker = (locationIndex)=>{
+  const moveChecker = (locationIndex) => {
     console.log(`move ${locationIndex}`)
     const selectedCheckerIndex = checkerCurrentLocations.indexOf(selectedChecker)
-    
+
     checkerCurrentLocations[selectedCheckerIndex] = locationIndex
-    
-    
+
+
     const deleteLocationIndex = (locationIndex + selectedChecker) / 2
     const deleteArrayIndex = checkerCurrentLocations.indexOf(deleteLocationIndex)
-    checkerCurrentLocations.splice(deleteArrayIndex,1)
+    checkerCurrentLocations.splice(deleteArrayIndex, 1)
     console.log(checkerCurrentLocations)
     setCheckerCurrentLocations([...checkerCurrentLocations])
-    checkerOriginalLocations.splice(deleteArrayIndex,1)
+    checkerOriginalLocations.splice(deleteArrayIndex, 1)
     setCheckerOriginalLocations([...checkerOriginalLocations])
     console.log(checkerOriginalLocations)
     setSelectedChecker(0)
@@ -85,11 +86,12 @@ function App() {
   }
 
   if (gameState == PIECE_ASSIGNMENT) {
+    console.log(`checker original locations ${checkerOriginalLocations}`)
 
     return (
       <>
         <h1>Piece Assignment State</h1>
-        <Board buttonText='Play' buttonOnClick={() => { setGameState(AWAITING_RESET); setCheckerCurrentLocations([...checkerStartLocations]); setCheckerOriginalLocations([...checkerStartLocations]) }} saveURL={saveURL}>
+        <Board buttonText='Play' buttonOnClick={() => { setGameState(AWAITING_RESET); setCheckerCurrentLocations([...checkerStartLocations]); setCheckerOriginalLocations([...checkerStartLocations])}} saveURL={saveURL}>
           {one_onehundred.map((locationIndex, arrayIndex) => {// squares for the board
             if (locationIndex > 50 && !checkerStartLocations.includes(locationIndex)) {
               //square without a checker on event to add checker
@@ -101,7 +103,7 @@ function App() {
           }
           )}
           {checkerStartLocations.map((locationIndex, arrayIndex) => // checkers in starting locations
-            <Checker key={checkerOriginalLocations[arrayIndex]} locationIndex={locationIndex} onClick={() => { removeChecker(arrayIndex) }}></Checker>
+            <Checker key={checkerOriginalLocations[arrayIndex]} keyid={checkerOriginalLocations[arrayIndex]} locationIndex={locationIndex} onClick={() => { removeChecker(arrayIndex) }}></Checker>
           )}
         </Board>
 
@@ -113,28 +115,30 @@ function App() {
     return (
       <>
         <h1>Piece Movement State</h1>
-        <Board buttonText='Reset' buttonOnClick={() => { setGameState(PIECE_ASSIGNMENT) }}>
+        <Board buttonText='Reset' buttonOnClick={() => { setGameState(PIECE_ASSIGNMENT); setCheckerOriginalLocations([... checkerStartLocations])}}>
           {one_onehundred.map((locationIndex, arrayIndex) => // squares for the board
 
             <Square key={locationIndex} locationIndex={locationIndex} ></Square>)
 
-          }
-          {
-            highlightedSquares.map((locationIndex, arrayIndex) =>
-              <Square key={locationIndex} locationIndex={locationIndex} onClick={() => { moveChecker(locationIndex) }} highlighted={true}></Square>
-            )
           }
 
 
 
           {checkerCurrentLocations.map((locationIndex, arrayIndex) => {// checkers in starting locations
             if (locationIndex == selectedChecker) {
-              return (<Checker key={checkerOriginalLocations[arrayIndex]} locationIndex={locationIndex} onClick={() => { deselectChecker(arrayIndex) }} selected={true}></Checker>)
+              return (<Checker key={checkerOriginalLocations[arrayIndex]} keyid={checkerOriginalLocations[arrayIndex]} locationIndex={locationIndex} onClick={() => { deselectChecker(arrayIndex) }} selected={true}></Checker>)
             } else {
-              return (<Checker key={checkerOriginalLocations[arrayIndex]} locationIndex={locationIndex} onClick={() => { selectChecker(arrayIndex) }} ></Checker>)
+              return (<Checker key={checkerOriginalLocations[arrayIndex]} keyid={checkerOriginalLocations[arrayIndex]} locationIndex={locationIndex} onClick={() => { selectChecker(arrayIndex) }} ></Checker>)
             }
           }
           )}
+
+
+          {
+            highlightedSquares.map((locationIndex, arrayIndex) =>
+              <Square key={locationIndex} locationIndex={locationIndex} onClick={() => { moveChecker(locationIndex) }} highlighted={true}></Square>
+            )
+          }
         </Board>
       </>
     )
@@ -144,12 +148,12 @@ function App() {
     return (
       <>
         <h1>Awaiting Reset State</h1>
-        <Board buttonText='Reset' buttonOnClick={() => { setGameState(PIECE_ASSIGNMENT) }}>
+        <Board buttonText='Reset' buttonOnClick={() => { setGameState(PIECE_ASSIGNMENT); setCheckerOriginalLocations([... checkerStartLocations]) }}>
           {one_onehundred.map((locationIndex, arrayIndex) => // squares for the board
             <Square key={locationIndex} locationIndex={locationIndex} ></Square>
           )}
           {checkerCurrentLocations.map((locationIndex, arrayIndex) => // checkers in starting locations
-            <Checker key={locationIndex} locationIndex={locationIndex} onClick={() => { selectChecker(arrayIndex) }}></Checker>
+            <Checker key={checkerOriginalLocations[arrayIndex]} keyid={checkerOriginalLocations[arrayIndex]} locationIndex={locationIndex} onClick={() => { selectChecker(arrayIndex) }}></Checker>
           )}
         </Board>
       </>
@@ -202,31 +206,31 @@ function Square({ locationIndex, onClick, highlighted }) {
 
   const ij = ijfromlocationindex(locationIndex)
   const o = objectprops(ij.i, ij.j)
-  const squareStyle = {WebkitTransition: '0.3s ease-in-out',MozTransition: '0.3s ease-in-out',OTransition: '0.3s ease-in-out',Transition: '0.3s ease-in-out'};
   if (highlighted) {
     //#6a2150
     return (
-      <rect x={o.x} y={o.y} fill={o.rectfill} width={o.width} height={o.width} onClick={onClick} stroke="orange" style={squareStyle}></rect>
+      <rect x={o.x} y={o.y} fill={o.rectfill} width={o.width} height={o.width} onClick={onClick} stroke="orange"></rect>
     )
   }
   return (
-    <rect x={o.x} y={o.y} fill={o.rectfill} width={o.width} height={o.width} onClick={onClick} style={squareStyle}></rect>
+    <rect x={o.x} y={o.y} fill={o.rectfill} width={o.width} height={o.width} onClick={onClick}></rect>
   )
 
 }
 
-function Checker({ locationIndex, selected, onClick }) {
+function Checker({ locationIndex, selected, onClick, keyid }) {
   const ij = ijfromlocationindex(locationIndex)
   const o = objectprops(ij.i, ij.j)
+  //const checkerStyle = {WebkitTransition: '0.3s ease-in-out',MozTransition: '0.3s ease-in-out',OTransition: '0.3s ease-in-out',Transition: '0.3s ease-in-out'};
 
   if (selected) {
     //#6a2150
     return (
-      <circle cx={o.cx} cy={o.cy} fill='#6a2150' r={o.r} onClick={onClick} stroke="#adafaf"></circle>
+      <circle id={keyid} className='checker' cx={o.cx} cy={o.cy} fill='#6a2150' r={o.r} onClick={onClick} stroke="#adafaf"></circle>
     )
   }
   return (
-    <circle cx={o.cx} cy={o.cy} fill='#d10373' r={o.r} onClick={onClick} stroke="#adafaf" strokeWidth="0.5"></circle>
+    <circle id={keyid} className='checker' cx={o.cx} cy={o.cy} fill='#d10373' r={o.r} onClick={onClick} stroke="#adafaf" strokeWidth="0.5" ></circle>
   )
 }
 
